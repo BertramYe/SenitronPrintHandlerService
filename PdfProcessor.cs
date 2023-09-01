@@ -67,15 +67,6 @@ namespace SenitronPrintHandlerService
             }
 
 
-
-            // get the final image path
-            //string finalImagePath = "./Images/";
-            //string finalImagePath = ini.GetConfigInfo("FinalImagePath");
-            //if (!Directory.Exists(finalImagePath))
-            //{
-            //    Directory.CreateDirectory(finalImagePath);
-            //}
-
             using (PdfReader reader = new PdfReader(pdfFilePath))
             {
 

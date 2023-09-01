@@ -47,7 +47,7 @@ namespace SenitronPrintHandlerService
                 serviceLogs.WriteLog("start the service!!!");
                 FileSystemWatcher watcher = new FileSystemWatcher(pdfFromPath);
                 PdfProcessor pdfprocessor = new PdfProcessor();
-                watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size;
+                watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.LastAccess;
                 //watcher.NotifyFilter = NotifyFilters.FileName;
 
                 // watcher event
@@ -80,13 +80,17 @@ namespace SenitronPrintHandlerService
         public void StopPdfWatcher()
         {
             _fileWatcher.EnableRaisingEvents = false;
-
-
             // release resource
             _fileWatcher.Dispose();
         }
 
-      
+        //private void RestartPdfWatcher()
+        //{
+        //    _fileWatcher.EnableRaisingEvents = false;
+        //    _fileWatcher.EnableRaisingEvents = true;
+        //}
+
+
         private void OnFileCreated(object sender, FileSystemEventArgs e)
         {
             int currentFileCount = Directory.GetFiles(_pdfFromPath).Length;
@@ -101,15 +105,17 @@ namespace SenitronPrintHandlerService
                     foreach (string file in files)
                     {
                         _serviceLogs.WriteLog($"find pdf file : {file} ");
-                        _serviceLogs.WriteLog($"bgin to handle pdf file : {file} ");
+                        _serviceLogs.WriteLog($"begin to handle pdf file : {file} ");
                         _pdfprocessor.Process(file, _settingFilePath, _logFilePath);
                         string fileName = Path.GetFileName(file);
                         string tomovepath = Path.Combine(_pdfToPath, fileName);
                         _serviceLogs.WriteLog($"end handle pdf file : {file} ");
-                        File.Move(file, tomovepath);
+                        File.Copy(file, tomovepath, true);
                         _serviceLogs.WriteLog($"moved pdf file from path: {file}  to path {tomovepath}");
-                       
+                        File.Delete(file);
+                        
                     }
+                    //RestartPdfWatcher();
                 }
                 catch (Exception ex)
                 {
