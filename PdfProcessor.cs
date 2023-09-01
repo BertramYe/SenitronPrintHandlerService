@@ -14,11 +14,18 @@ namespace SenitronPrintHandlerService
 {
     internal class PdfProcessor
     {
+        private string _serviceRootPath;
+        public PdfProcessor(string serviceRootPath)
+        {
+            _serviceRootPath = serviceRootPath;
+        }
 
-        public void Process(string pdfFilePath, string settingFilePath,string logFilePath)
+
+        public void Process(string pdfFilePath, string logFilePath)
         {
             // Load the setup.ini file
             IniFile ini = new IniFile();
+            string settingFilePath = Path.Combine(_serviceRootPath, "setup.ini");
             ini.InitReadFile(settingFilePath);
             // get application running times
             string appRunningTimes = ini.GetConfigInfo("ApplicationRunningTimes");
@@ -112,13 +119,13 @@ namespace SenitronPrintHandlerService
                 //Console.WriteLine("finished the reading of the PDF");
 
             }
-            ini.ResetSetUpFile(ini, targetCoord);
+            //ini.ResetSetUpFile(ini, targetCoord);
             pdfHandlelog.WriteLog($"finished to handle the PDF Files {pdfFilePath} !");
             //MessageBox.Show($"finished to handle the PDF Files {pdfFilePath} !");
         }
 
 
-        private static Dictionary<string, string> ExtractAllItemCode(int page, string pdfFilePath, Dictionary<string, System.Drawing.Rectangle> rectDic, List<string> targetCoord, string[] filter_list, LogHelper pdfHandlelog)
+        private Dictionary<string, string> ExtractAllItemCode(int page, string pdfFilePath, Dictionary<string, System.Drawing.Rectangle> rectDic, List<string> targetCoord, string[] filter_list, LogHelper pdfHandlelog)
         {
             Dictionary<string, string> pageItemcodeDic = new Dictionary<string, string>();
 
@@ -147,7 +154,7 @@ namespace SenitronPrintHandlerService
         }
 
 
-        private static string CutOffImagesFromPDF(int page, string pdfFilePath, Dictionary<string, System.Drawing.Rectangle> rectDic, string reactangleName, LogHelper pdfHandlelog)
+        private string CutOffImagesFromPDF(int page, string pdfFilePath, Dictionary<string, System.Drawing.Rectangle> rectDic, string reactangleName, LogHelper pdfHandlelog)
         {
 
             string outImagePath = "";
@@ -158,7 +165,8 @@ namespace SenitronPrintHandlerService
 
 
             // the temp  cache path 
-            string temp_path_dir = "./Temp/";
+            //string temp_path_dir = "./Temp/";
+            string temp_path_dir = Path.Combine(Path.GetFullPath(_serviceRootPath), "Temp"); 
             if (!Directory.Exists(temp_path_dir))
             {
                 Directory.CreateDirectory(temp_path_dir);
@@ -187,7 +195,7 @@ namespace SenitronPrintHandlerService
 
 
 
-        private static string ExtractItemCode(string imagePath, string filter, LogHelper pdfHandlelog, string itemcodeName)
+        private string ExtractItemCode(string imagePath, string filter, LogHelper pdfHandlelog, string itemcodeName)
         {
 
             // get the itemCode from the image in the temp dir
@@ -197,8 +205,8 @@ namespace SenitronPrintHandlerService
             {
                 return itemCode;   // path not valid
             }
-
-            using (var engine = new TesseractEngine("tessdata", "eng", EngineMode.Default))
+            string tesstDict = Path.Combine(Path.GetFullPath(_serviceRootPath), "tessdata");
+            using (var engine = new TesseractEngine(tesstDict, "eng", EngineMode.Default))
             {
                 try
                 {

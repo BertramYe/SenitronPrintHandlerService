@@ -17,13 +17,14 @@ namespace SenitronPrintHandlerService
 
             // start init the config
             // get the config information
-            string settingFilePath = Path.GetFullPath(_configuration.GetSection("SenitronPrintHandlerServiceConfig:SettingFilePath").Value);
+            string ServiceRootPath = _configuration.GetSection("SenitronPrintHandlerServiceConfig:ServiceRootPath").Value;
+            //string settingFilePath = Path.Combine(Path.GetFullPath(ServiceRootPath),"setup.ini");
             string pdfFromPath = _configuration.GetSection("SenitronPrintHandlerServiceConfig:PDFFromPath").Value;
             string pdfToPath = _configuration.GetSection("SenitronPrintHandlerServiceConfig:PDFToPath").Value;
             string logFilePath = _configuration.GetSection("SenitronPrintHandlerServiceConfig:LogFilePath").Value;
 
             // start init the config
-            PdfFileWatcher pdfWatcher = new PdfFileWatcher(settingFilePath, pdfFromPath, pdfToPath, logFilePath);
+            PdfFileWatcher pdfWatcher = new PdfFileWatcher(ServiceRootPath, pdfFromPath, pdfToPath, logFilePath);
             //PdfProcessor pdfProcessor = new PdfProcessor();
             try
             {

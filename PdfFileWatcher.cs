@@ -12,21 +12,22 @@ namespace SenitronPrintHandlerService
     {
         FileSystemWatcher _fileWatcher;
         //private ILogger<Worker> _logger;
-        private string _settingFilePath;
+        //private string _settingFilePath;  Path.Combine(Path.GetFullPath(ServiceRootPath),"setup.ini");
         private string _pdfFromPath;
         private string _pdfToPath;
         private string _logFilePath;
         private LogHelper _serviceLogs;
         private PdfProcessor _pdfprocessor;
+        private string _serviceRootPath;
 
-        public PdfFileWatcher(string settingFilePath,string pdfFromPath,string pdfToPath, string logFilePath)
+        public PdfFileWatcher(string ServiceRootPath, string pdfFromPath,string pdfToPath, string logFilePath)
         {
-            initial(settingFilePath, pdfFromPath, pdfToPath, logFilePath);
+            initial(ServiceRootPath, pdfFromPath, pdfToPath, logFilePath);
  
         }
 
 
-        private void initial(string settingFilePath, string pdfFromPath, string pdfToPath, string logFilePath)
+        private void initial(string ServiceRootPath, string pdfFromPath, string pdfToPath, string logFilePath)
         {
             try
             {
@@ -46,7 +47,7 @@ namespace SenitronPrintHandlerService
                 LogHelper serviceLogs = new LogHelper(logFilePath, "serviceRunnings");
                 serviceLogs.WriteLog("start the service!!!");
                 FileSystemWatcher watcher = new FileSystemWatcher(pdfFromPath);
-                PdfProcessor pdfprocessor = new PdfProcessor();
+                PdfProcessor pdfprocessor = new PdfProcessor(ServiceRootPath);
                 watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.LastAccess;
                 //watcher.NotifyFilter = NotifyFilters.FileName;
 
@@ -56,12 +57,13 @@ namespace SenitronPrintHandlerService
                 //watcher.Deleted += OnFileDeleted;
 
                 _fileWatcher = watcher;
-                _settingFilePath = settingFilePath;
+                //_settingFilePath = settingFilePath;
                 _pdfFromPath = pdfFromPath;
                 _pdfToPath = pdfToPath;
                 _serviceLogs = serviceLogs;
                 _pdfprocessor = pdfprocessor;
                 _logFilePath = logFilePath;
+                _serviceRootPath = ServiceRootPath;
 
             }
             catch (Exception ex)
@@ -106,7 +108,7 @@ namespace SenitronPrintHandlerService
                     {
                         _serviceLogs.WriteLog($"find pdf file : {file} ");
                         _serviceLogs.WriteLog($"begin to handle pdf file : {file} ");
-                        _pdfprocessor.Process(file, _settingFilePath, _logFilePath);
+                        _pdfprocessor.Process(file,_logFilePath);
                         string fileName = Path.GetFileName(file);
                         string tomovepath = Path.Combine(_pdfToPath, fileName);
                         _serviceLogs.WriteLog($"end handle pdf file : {file} ");
